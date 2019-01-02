@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.skhu.mapper.StudentMapper">
+    <select id="findByIdAndPassword" resultType="int">
+        select count(*) from student
+        where id = #{id} and password = #{password}
+   </select>
+
+    <select id="findByIdPage" resultMap="resultMapId">
+        <bind name="start" value="(currentPage-1)*pageSize"/>
+        <bind name="end" value="pageSize"/>
+        SELECT s.*, d.departmentName,r.detailType , m.*, m.detailType as detailType2,
+        CASE WHEN grade = '4.5' THEN 'A+'
+        WHEN grade = '4.0' THEN 'A0'
+        WHEN grade = '3.5' THEN 'B+'
+        WHEN grade = '3.0' THEN 'B0'
+        WHEN grade = '2.5' THEN 'C+'
+        WHEN grade = '2.0' THEN 'C0'
+        WHEN grade = '1.5' THEN 'D+'
+        WHEN grade = '1.0' THEN 'D0'
+        WHEN grade = '0.0' THEN 'F'
+        WHEN grade = 'P' THEN 'P'
+        else 'NP'
+        END AS gradeA
+        FROM student s
+        left join department d on s.department_id = d.id
+        left join graduationRule r on s.graduationRule_id=r.id
+        left join mylecture m on s.id = m.student_id
+        where s.id = #{id}
+
+    </select>
+
+    <!--  학번으로 학생찾기 -->
+    <select id="findById" resultMap="resultMapId">
+        SELECT s.*, d.departmentName,r.* , m.*, m.detailType as detailType2,
+        CASE WHEN grade = '4.5' THEN 'A+'
+        WHEN grade = '4.0' THEN 'A0'
+        WHEN grade = '3.5' THEN 'B+'
+        WHEN grade = '3.0' THEN 'B0'
+        WHEN grade = '2.5' THEN 'C+'
+        WHEN grade = '2.0' THEN 'C0'
+        WHEN grade = '1.5' THEN 'D+'
+        WHEN grade = '1.0' THEN 'D0'
+        WHEN grade = '0.0' THEN 'F'
+        WHEN grade = 'P' THEN 'P'
+        else 'NP'
+        END AS gradeA
+        FROM student s
+        left join department d on s.department_id = d.id
+        left join graduationRule r on s.graduationRule_id=r.id
+        left join mylecture m on s.id = m.student_id
+        where s.id = #{id} ;
+    </select>
+
+    <select id="findByIdMajor" resultMap="resultMapId">
+        SELECT s.*, d.departmentName,r.detailType , m.*, m.detailType as detailType2,
+        CASE WHEN grade = '4.5' THEN 'A+'
+        WHEN grade = '4.0' THEN 'A0'
+        WHEN grade = '3.5' THEN 'B+'
+        WHEN grade = '3.0' THEN 'B0'
+        WHEN grade = '2.5' THEN 'C+'
+        WHEN grade = '2.0' THEN 'C0'
+        WHEN grade = '1.5' THEN 'D+'
+        WHEN grade = '1.0' THEN 'D0'
+        WHEN grade = '0.0' THEN 'F'
+        WHEN grade = 'P' THEN 'P'
+        else 'NP'
+        END AS gradeA
+        FROM student s
+        left join department d on s.department_id = d.id
+        left join graduationRule r on s.graduationRule_id=r.id
+        left join mylecture m on s.id = m.student_id
+        where s.id = #{id} and (m.detailType='전필' or m.detailType=null);
+    </select>
+    <select id="findByIdCulture" resultMap="resultMapId">
+        SELECT s.*, d.departmentName,r.detailType , m.*, m.detailType as detailType2,
+        CASE WHEN grade = '4.5' THEN 'A+'
+        WHEN grade = '4.0' THEN 'A0'
+        WHEN grade = '3.5' THEN 'B+'
+        WHEN grade = '3.0' THEN 'B0'
+        WHEN grade = '2.5' THEN 'C+'
+        WHEN grade = '2.0' THEN 'C0'
+        WHEN grade = '1.5' THEN 'D+'
+        WHEN grade = '1.0' THEN 'D0'
+        WHEN grade = '0.0' THEN 'F'
+        WHEN grade = 'P' THEN 'P'
+        else 'NP'
+        END AS gradeA
+        FROM student s
+        left join department d on s.department_id = d.id
+        left join graduationRule r on s.graduationRule_id=r.id
+        left join mylecture m on s.id = m.student_id
+        where s.id = #{id} and m.detailType='교필';
+    </select>
+    <select id="findByIdF" resultMap="resultMapId">
+        SELECT s.*, d.departmentName,r.detailType , m.*, m.detailType as detailType2,
+        CASE WHEN grade = '4.5' THEN 'A+'
+        WHEN grade = '4.0' THEN 'A0'
+        WHEN grade = '3.5' THEN 'B+'
+        WHEN grade = '3.0' THEN 'B0'
+        WHEN grade = '2.5' THEN 'C+'
+        WHEN grade = '2.0' THEN 'C0'
+        WHEN grade = '1.5' THEN 'D+'
+        WHEN grade = '1.0' THEN 'D0'
+        WHEN grade = '0.0' THEN 'F'
+        WHEN grade = 'P' THEN 'P'
+        else 'NP'
+        END AS gradeA
+        FROM student s
+        left join department d on s.department_id = d.id
+        left join graduationRule r on s.graduationRule_id=r.id
+        left join mylecture m on s.id = m.student_id
+        where s.id = #{id} and m.grade='F';
+    </select>
+
+    <resultMap id="resultMapId" type="Student">
+        <id property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="email" column="email" />
+        <result property="comment" column="comment" />
+        <result property="detailType" column="detailType" />
+        <result property="majorGoal" column="majorGoal"/>
+        <result property="cultureGoal" column="cultureGoal"/>
+        <result property="departmentName" column="departmentName"/>
+        <result property="graduationRule_id" column="graduationRule_id"/>
+        <result property="myGrade" column="myGrade" />
+        <collection property="myLecture" ofType="Lecture">
+            <id property="year" column="lecture_year"/>
+            <id property="semester" column="lecture_semester"/>
+            <id property="id" column="lecture_id"/>
+            <result property="title" column="title"/>
+            <result property="detailType" column="detailType2"/>
+            <result property="credit" column="credit"/>
+            <result property="grade" column="grade"/>
+            <result property="gradeA" column="gradeA"/>
+        </collection>
+    </resultMap>
+
+    <select id="totalSemester" resultType="int">
+      select count(distinct m.lecture_year, m.lecture_semester) totalSemester
+		from student s left join mylecture m
+        on s.id=m.student_id
+        where s.id=#{id} and m.lecture_semester not in('여름학기','겨울학기');
+    </select>
+
+    <select id="totalCredit" resultType="int">
+      select ifnull(sum(m.credit),0) totalCredit
+	  from (select credit,min(grade) from student s
+      left join mylecture m
+	  on s.id=m.student_id
+	  where s.id=#{id} and m.grade!='F' and m.grade!='NP'
+      group by m.title)m
+    </select>
+
+    <select id="totalCreditMajor" resultType="int">
+      select ifnull(sum(m.credit),0) totalCredit
+	  from (select credit,min(grade) from student s
+      left join mylecture m
+	  on s.id=m.student_id
+	  where s.id=#{id} and m.grade!='F' and m.grade!='NP' and (m.detailType='전선'or m.detailType='전필'or m.detailType='전탐')
+      group by m.title)m;
+    </select>
+
+    <select id="totalCreditCulture" resultType="int">
+      select ifnull(sum(m.credit),0) totalCredit
+	  from (select credit,min(grade) from student s
+      left join mylecture m
+	  on s.id=m.student_id
+	  where s.id=#{id} and m.grade!='F' and m.grade!='NP' and (m.detailType='교선'or m.detailType='교필')
+      group by m.title)m
+    </select>
+
+    <select id="avgGrade" resultType="double">
+      select ifnull(round(sum(gradeA)/sum(credit),2), 0.0)
+      from
+        (select credit,credit*
+		CASE WHEN min(grade) = 'A+' THEN '4.5'
+        WHEN min(grade) = 'A0' THEN '4.0'
+        WHEN min(grade) = 'B+' THEN '3.5'
+        WHEN min(grade) = 'B0' THEN '3.0'
+        WHEN min(grade) = 'C+' THEN '2.5'
+        WHEN min(grade) = 'C0' THEN '2.0'
+        WHEN min(grade) = 'D+' THEN '1.5'
+        WHEN min(grade) = 'D0' THEN '1.0'
+        WHEN min(grade) = 'F' THEN '0.0'
+        WHEN min(grade) = 'P' THEN 'P'
+        else 'NP'
+        END as gradeA
+      from student s left join mylecture m on s.id=m.student_id
+      where m.grade not in('P','NP') and s.id =#{id} group by title)alias
+    </select>
+
+    <select id="creditPercent" resultType="int">
+      select ifnull(round(sum(m.credit)/130*100,0),0) totalCredit
+      from (select credit,min(grade) from student s
+      left join mylecture m
+      on s.id=m.student_id
+      where s.id=#{id} and  m.grade!='F' and m.grade!='NP'
+      group by m.title)m
+    </select>
+
+    <select id="creditPercentMajor" resultType="int">
+      select ifnull(round(sum(m.credit)/m.majorGoal*100,0),0) totalCredit
+      from
+      (select s.id,credit,min(grade),r.majorGoal from student s
+      left join mylecture m on s.id=m.student_id
+      left join graduationrule r on s.graduationrule_id=r.id
+      where s.id=#{id} and (m.detailType='전선'or m.detailType='전필') and m.grade!='F' and m.grade!='NP'
+      group by m.title)m
+    </select>
+
+    <select id="creditPercentCulture" resultType="int">
+      select ifnull(round(sum(m.credit)/m.majorGoal*100,0),0) totalCredit
+      from
+      (select s.id,credit,min(grade),r.majorGoal from student s
+      left join mylecture m on s.id=m.student_id
+      left join graduationrule r on s.graduationrule_id=r.id
+      where s.id=#{id} and (m.detailType='교선'or m.detailType='교필') and m.grade!='F' and m.grade!='NP'
+      group by m.title)m
+    </select>
+
+    <select id="chapelCount" resultType="int">
+      SELECT count(*) FROM student s
+      left join mylecture m
+      on s.id=m.student_id
+      where m.grade != 'NP' and (s.id=#{id}) and((m.lecture_id='AC00001') or (m.title LIKE '%채플%'));
+    </select>
+
+    <select id="chapelPercent" resultType="int">
+      SELECT round(count(*)/2*100,0) FROM student s
+      left join mylecture m
+      on s.id=m.student_id
+      where m.grade != 'NP' and(s.id=#{id}) and((m.lecture_id='AC00001') or (m.title LIKE '%채플%'));
+    </select>
+
+    <select id="volunteerCount" resultType="int">
+      SELECT count(*) FROM student s
+      left join mylecture m
+      on s.id=m.student_id
+      where m.grade != 'NP' and (s.id=#{id}) and(m.title LIKE '%봉사%')
+    </select>
+
+    <select id="volunteerPercent" resultType="int">
+      SELECT count(*)*100 FROM student s
+      left join mylecture m
+      on s.id=m.student_id
+      where m.grade != 'NP' and (s.id=#{id}) and(m.title LIKE '%봉사%');
+    </select>
+
+
+
+    <select id="findByStudent" resultType="Student">
+          select s.*,d.departmentName,r.detailType from student s
+        left join department d on s.department_Id=d.id
+        left join graduationRule r on s.graduationRule_id=r.id
+        where s.id = #{id}
+    </select>
+
+    <!-- 전체학생조회 / 미충족학생조회-->
+    <select id="selectPage" resultType="Student">
+        <bind name="start" value="(currentPage-1)*pageSize"/>
+        <bind name="end" value="pageSize"/>
+        select s.*, d.departmentName
+        from student s inner join department d
+        on s.department_id = d.id
+        <where>
+            <if test="choice == 1">
+                s.name like concat(#{search},'%')
+            </if>
+            <if test="choice == 2">
+                d.departmentName like concat(#{search},'%')
+            </if>
+            <if test="choice == 3">
+                s.id like concat (#{search},'%')
+            </if>
+            <if test="choice == 4">
+                s.myGrade = #{search}
+            </if>
+        </where>
+        limit ${start} , ${end}
+    </select>
+
+    <select id="selectPage2" resultType="Student">
+        <bind name="start" value="(currentPage-1)*pageSize"/>
+        <bind name="end" value="pageSize"/>
+        select * from
+        (select s.id, s.name, s.email,s.myGrade, d.departmentName,count(distinct m.lecture_year, m.lecture_semester)+1 semester, ifnull(sum(m.credit),0) totalCredit
+        from student s
+        inner join department d on s.department_id = d.id
+        left outer join mylecture m on s.id = m.student_id
+        where m.lecture_semester not in ('여름학기','겨울학기')
+        group by s.id)s
+        where (semester >= 6) and (130>totalCredit) and (s.myGrade = 4)
+        <where>
+            <if test="choice == 1">
+                s.name like concat(#{search},'%')
+            </if>
+            <if test="choice == 2">
+                d.departmentName like concat(#{search},'%')
+            </if>
+            <if test="choice == 3">
+                s.id like concat (#{search},'%')
+            </if>
+        </where>
+        limit ${start} , ${end}
+    </select>
+
+    <select id="selectCount" resultType="int">
+        select count(*)
+        from student s inner join department d
+        on s.department_id = d.id
+        <where>
+            <if test="choice == 1">
+                s.name like concat(#{search},'%')
+            </if>
+            <if test="choice == 2">
+                d.departmentName like concat(#{search},'%')
+            </if>
+            <if test="choice == 3">
+                s.id like concat (#{search},'%')
+            </if>
+            <if test="choice == 4">
+                s.myGrade = #{search}
+            </if>
+        </where>
+    </select>
+    <select id="selectCount2" resultType="int">
+        select count(*) from
+        (select s.id, s.name, s.email,s.myGrade, d.departmentName,count(distinct m.lecture_year, m.lecture_semester)+1 semester, ifnull(sum(m.credit),0) totalCredit
+        from student s
+        inner join department d on s.department_id = d.id
+        left outer join mylecture m on s.id = m.student_id
+        where m.lecture_semester not in ('여름학기','겨울학기')
+        group by s.id)s
+        where (semester >= 6) and (130 > totalCredit) and (s.myGrade = 4)
+        <where>
+            <if test="choice == 1">
+                s.name like concat(#{search},'%')
+            </if>
+            <if test="choice == 2">
+                d.departmentName like concat(#{search},'%')
+            </if>
+            <if test="choice == 3">
+                s.id like concat (#{search},'%')
+            </if>
+        </where>
+    </select>
+
+
+    <select id="findAll" resultMap="resultMap1">
+        select s.*, d.departmentName
+        from student s inner join department d
+        on s.department_id = d.id
+    </select>
+
+    <resultMap id="resultMap1" type="Student">
+        <id property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="email" column="email" />
+        <result property="myGrade" column="myGrade" />
+        <association property="department" javaType="Department">
+            <result property="departmentName" column="departmentName" />
+        </association>
+    </resultMap>
+
+
+    <select id="findByPassword" resultType="String">
+        select password from student
+        where question = #{answer} and name = #{name} and id = #{id}
+    </select>
+
+
+    <!-- 로그인 중복 체크 -->
+    <select id="selectByLoginIdCheck" resultType="int">
+	select count(*) from student where id = #{id}
+	</select>
+
+<!--    나중에 otp 추가하기-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+	INSERT Student (id, name, department_id, password, email,question, phone,graduationRule_id,myGrade)
+	VALUES (#{id}, #{name}, #{department_id}, #{password}, #{email},#{question}, #{phone},#{graduationRule_id},1)
+	</insert>
+
+    <update id="updateMember">
+    update student set
+        name = #{name} ,
+        email = #{email} ,
+        password = #{password} ,
+        question = #{question} ,
+        phone = #{phone},
+        myGrade =#{myGrade}
+    where id = #{id}
+    </update>
+
+
+    <update id="updateNameAndDepartment">
+        update student set
+          name = #{name} ,
+          department_id = #{department_id}
+        where id = #{id}
+    </update>
+
+    <update id="updateRule">
+        update student set
+          graduationRule_id = #{graduationRule_id}
+        where id = #{id}
+    </update>
+
+    <update id="updateComment">
+        update Student set
+          comment = #{comment}
+        where id = #{id}
+    </update>
+
+
+    <select id="doubleMajor" resultType="int">
+      select ifnull(sum(m.credit),0) doubleMajor
+      from (select credit,min(grade) from student s
+      left join mylecture m on s.id=m.student_id
+      left join graduationrule r on s.graduationrule_id=r.id
+      left join comgraduationrule c on r.comgraduationId = c.id
+      where s.id=#{id} and (m.detailType='복필'or m.detailType='복선') and m.grade!='F' and m.grade!='NP'
+      group by m.title)m
+    </select>
+
+    <select id="doubleMajorPercent" resultType="int">
+    select ifnull(round(sum(m.credit)/40*100,0),0) majorSearch
+      from (select credit,min(grade) from student s
+      left join mylecture m on s.id=m.student_id
+      left join graduationrule r on s.graduationrule_id=r.id
+      left join comgraduationrule c on r.comgraduationId = c.id
+      where s.id=#{id} and (m.detailType='복필'or m.detailType='복선') and m.grade!='F' and m.grade!='NP'
+      group by m.title)m
+    </select>
+
+    <select id="minor" resultType="int">
+      select ifnull(sum(m.credit),0) minor
+      from (select credit,min(grade) from student s
+      left join mylecture m on s.id=m.student_id
+      left join graduationrule r on s.graduationrule_id=r.id
+      left join comgraduationrule c on r.comgraduationId = c.id
+      where s.id=#{id} and (m.detailType='부필'or m.detailType='부선') and m.grade!='F' and m.grade!='NP'
+      group by m.title)m
+    </select>
+
+    <select id="minorPercent" resultType="int">
+    select ifnull(round(sum(m.credit)/21*100,0),0) majorSearch
+      from (select credit,min(grade) from student s
+      left join mylecture m on s.id=m.student_id
+      left join graduationrule r on s.graduationrule_id=r.id
+      left join comgraduationrule c on r.comgraduationId = c.id
+      where s.id=#{id} and (m.detailType='부필'or m.detailType='부선') and m.grade!='F' and m.grade!='NP'
+      group by m.title)m
+    </select>
+
+    <!--전공탐색 계산-->
+    <select id="majorSearch" resultType="int">
+    select ifnull(sum(m.credit),0) majorSearch
+      from (select credit,min(grade) from student s
+      left join mylecture m on s.id=m.student_id
+      left join graduationrule r on s.graduationrule_id=r.id
+      left join comgraduationrule c on r.comgraduationId = c.id
+      where s.id=#{id} and (m.detailType='전탐') and m.grade!='F' and m.grade!='NP'
+      group by m.title)m
+    </select>
+
+    <!--전공탐색 퍼센트 계산-->
+    <select id="majorSearchPercent" resultType="int">
+      select ifnull(round(sum(m.credit)/19*100,0),0) majorSearch
+      from (select credit,min(grade) from student s
+      left join mylecture m on s.id=m.student_id
+      left join graduationrule r on s.graduationrule_id=r.id
+      left join comgraduationrule c on r.comgraduationId = c.id
+      where s.id=#{id} and (m.detailType='전탐') and m.grade!='F' and m.grade!='NP'
+      group by m.title)m
+    </select>
+
+</mapper>

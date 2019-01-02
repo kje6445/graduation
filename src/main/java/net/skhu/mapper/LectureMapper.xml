@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.skhu.mapper.LectureMapper">
+
+
+    <resultMap id="ResultMap1" type="Lecture">
+        <id property="year" column="year"></id>
+        <id property="semester" column="semester"></id>
+        <id property="id" column="id"></id>
+        <id property="split" column="split"></id>
+        <id property="num" column="num"></id>
+        <result property="admin_id" column="admin_id"></result>
+        <result property="title" column="title"></result>
+        <result property="credit" column="credit"></result>
+        <result property="subType" column="subType"></result>
+
+        <association property="admin" javaType="Admin">
+
+            <id property="id" column="admin_Id"></id>
+            <result property="name" column="adminName"></result>
+        </association>
+
+    </resultMap>
+
+    <!--전체 년도,
+    과목 리스트-->
+    <select id="findAll" resultMap="ResultMap1">
+        <bind name="start" value="(currentPage-1)*pageSize"/>
+        <bind name="end" value="pageSize"/>
+        select l.*,a.name adminName
+        from lecture l
+        left join admin a
+        on l.admin_id= a.id
+        order by year desc
+        limit ${start} , ${end}
+    </select>
+    <!--전체년도
+    과목리스트 카운트-->
+    <select id="count" resultType="int">
+        select count(*)
+        from lecture
+    </select>
+
+    <!--전체 년도,
+    과목 검색 후 리스트-->
+    <select id="findLecBySrch" resultMap="ResultMap1">
+        <bind name="start" value="(currentPage-1)*pageSize"/>
+        <bind name="end" value="pageSize"/>
+        select l.*,a.name adminName
+        from lecture l
+        left join admin a
+        on l.admin_id= a.id
+        <where>
+            <if test="choice == 0">
+                semester like concat(#{srch},'%')
+            </if>
+            <if test="choice == 1">
+                year = #{srch}
+            </if>
+            <if test="choice == 2">
+                l.id LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice ==3">
+                l.title LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice == 4">
+                subType LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice == 5">
+                credit = #{srch}
+            </if>
+        </where>
+        order by year desc
+        limit ${start} , ${end}
+    </select>
+
+    <!--전체년도
+   검색후 과목리스트 카운트-->
+    <select id="srchCount" resultType="int">
+        select count(*)
+        from lecture l
+        left join admin a
+        on l.admin_id= a.id
+        <where>
+            <if test="choice == 0">
+                semester like concat(#{srch},'%')
+            </if>
+            <if test="choice == 1">
+                year = #{srch}
+            </if>
+            <if test="choice == 2">
+                l.id LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice ==3">
+                l.title LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice == 4">
+                subType LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice == 5">
+                credit = #{srch}
+            </if>
+        </where>
+    </select>
+
+    <!--과목 하나 찾기-->
+    <select id="findLecture" resultMap="ResultMap1">
+       select l.*,a.name adminName
+       from lecture l
+       left join admin a
+       on l.admin_id= a.id
+       where year=#{year} and semester like #{semester} and l.id LIKE #{id} and split=#{split}
+    </select>
+
+    <!--현재 년도
+    과목 검색 후 리스트-->
+    <select id="findNowLecBySrch" resultMap="ResultMap1">
+        <bind name="start" value="(currentPage-1)*pageSize"/>
+        <bind name="end" value="pageSize"/>
+        select l.*,a.name adminName
+        from lecture l
+        left join admin a
+        on l.admin_id= a.id
+
+        <where>
+            <if test="choice == 0">
+                semester like concat(#{srch},'%')
+            </if>
+
+            <if test="choice == 2">
+                l.id LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice ==3">
+                l.title LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice == 4">
+                subType LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice == 5">
+                credit = #{srch}
+            </if>
+        </where>
+        order by year desc
+        limit ${start} , ${end}
+    </select>
+
+
+    <!--현재년도
+    검색후 과목리스트 카운트-->
+    <select id="srchNowCount" resultType="int">
+        select count(*)
+        from lecture l
+        left join admin a
+        on l.admin_id= a.id
+        <where>
+            <if test="choice == 0">
+                semester like concat(#{srch},'%')
+            </if>
+            <if test="choice == 2">
+                l.id LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice ==3">
+                l.title LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice == 4">
+                subType LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice == 5">
+                credit = #{srch}
+            </if>
+        </where>
+    </select>
+
+    <!-- 학번으로 안들은 전공필수과목 뽑기 -->
+    <select id="findEssentialMajor" resultType="Lecture">
+        select distinct (n.lecture_id), l.title from
+        (select g.lecture_id from grdlecture g
+        left outer join (select * from mylecture where student_id = #{id} and grade!='F' and grade!='NP')m
+        on g.lecture_id = m.lecture_id
+        where g.graduationRule_id = 1 and m.title is null)n
+        left join lecture l
+        on n.lecture_id = l.id;
+    </select>
+
+    <!-- 학번으로 안들은 교양필수과목 뽑기 -->
+    <select id="findEssentialCulture" resultType="Lecture">
+        SELECT distinct l.id, l.title, m.student_id FROM lecture l
+        left outer join (select * from mylecture where student_id=#{id} and grade!='F' and grade!='NP')m
+        on l.id = m.lecture_id
+        where (l.id='AF00011' or l.id='AF00002' or l.id='AE00022' or l.id='AF00001') and student_id is null
+        group by l.id
+    </select>
+
+    <!--18학번 이후 들어야할 교양 필수 과목 뽑기-->
+    <select id="findBy18CulturalEssentials" resultType="Lecture">
+        SELECT distinct l.id, l.title, m.student_id FROM lecture l
+        left outer join (select * from mylecture where student_id=#{id} and grade!='F' and grade!='NP')m
+        on l.id = m.lecture_id
+        where (l.id='AC00012' or l.id='AC00014' or l.id='AC00007' or l.id='AC00013' or (l.id='AC00015' AND l.title like concat('데이터 활용 및 분석(IT융합 1반)'))
+			or (l.id='AC00016' AND l.title like concat('과학기술과 에콜로지(IT융합 1반)')) or l.title like concat('사회봉사I'))
+        and student_id is null
+        group by l.id;
+    </select>
+
+
+    <insert id="insert">
+    INSERT Lecture (year, semester, id , split, title, admin_id, credit, subType)
+	VALUES (#{year}, #{semester}, #{id}, #{split}, #{title},#{admin_id}, #{credit},#{subType})
+    </insert>
+
+    <update id="update">
+        update lecture set
+        semester = #{semester},
+        year = #{year},
+        id = #{id},
+        split = #{split},
+        title = #{title},
+        admin_id = #{admin_id},
+        credit = #{credit},
+        subType = #{subType}
+        where num= #{num}
+
+    </update>
+
+    <delete id="delete">
+
+      Delete from lecture
+      where year=#{year} and semester like #{semester} and id LIKE #{id} and split = #{split}
+    </delete>
+
+    <!--소속 전공탐색 수 세기-->
+    <select id="countMajorSearch" resultType="int">
+      select count(*)
+      from student s
+      left join mylecture m on s.id=m.student_id
+      left join graduationrule r on s.graduationrule_id=r.id
+      left join comgraduationrule c on r.comgraduationId = c.id
+      where s.id=#{id} and m.lecture_id like concat('VI','%') and m.grade != 'F' and m.grade != 'NP'
+    </select>
+
+    <!--타 학부 전공탐색 수 세기-->
+    <select id="countUndergraduate" resultType="int">
+      select count(*)
+      from student s
+      left join mylecture m on s.id=m.student_id
+      left join graduationrule r on s.graduationrule_id=r.id
+      left join comgraduationrule c on r.comgraduationId = c.id
+      where s.id=#{id} and (m.lecture_id like concat('VM','%') or m.lecture_id like concat('VS','%')
+      or m.lecture_id like concat('VH','%')) and m.grade != 'F' and m.grade != 'NP'
+    </select>
+
+</mapper>

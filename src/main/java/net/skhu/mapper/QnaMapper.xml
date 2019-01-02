@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.skhu.mapper.QnaMapper">
+
+    <resultMap id="resultMapQ" type="Qna">
+        <id property="id" column="id"></id>
+        <result property="title" column="title"></result>
+        <result property="body" column="body"></result>
+        <result property="wtime" column="wtime"></result>
+        <result property="answerstate" column="answerstate"></result>
+        <result property="student_id" column="student_id"></result>
+        <result property="count" column="count"></result>
+        <association property="student" javaType="Student">
+            <id property="id" column="student_Id"></id>
+            <result property="name" column="studentName"></result>
+        </association>
+    </resultMap>
+
+    <select id="findAll" resultMap="resultMapQ">
+        <bind name="start" value="(currentPage-1)*pageSize"/>
+        <bind name="end" value="pageSize"/>
+    select a.id,a.title,a.wtime,a.answerstate,a.student_id,s.name studentName,a.count
+    from qna a
+    LEFT JOIN student s
+    on a.student_id = s.id
+    order by a.id desc
+    limit ${start} , ${end};
+    </select>
+
+    <select id="findAll2" resultMap="resultMapQ">
+        select a.*
+        from qna a
+        LEFT JOIN qnaanswer qa
+        on a.id = qa.qna_id
+        order by a.id desc
+    </select>
+
+    <select id="findNew" resultMap="resultMapQ">
+        select a.*
+        from qna a
+        LEFT JOIN qnaanswer qa
+        on a.id = qa.qna_id
+        order by a.id desc
+        limit 8;
+    </select>
+
+    <select id="findQna" resultMap="resultMapQ">
+    select q.*,s.name studentName
+    from qna q left join student s
+    on q.student_id = s.id
+      where q.id=#{id}
+    </select>
+
+    <select id="findByQnaa" resultMap="resultMapQ">
+    select *
+    from qna where id =#{id}
+    </select>
+
+    <select id="findOne" resultMap="resultMapQ">
+    select q.*,s.name studentName
+    from qna q left join student s
+    on q.student_id = s.id
+      where q.id=#{id}
+    </select>
+
+    <insert id="insert" >
+    INSERT Qna (title, body , wtime,  student_id)
+	VALUES ( #{title}, #{body}, now() ,#{student_id})
+    </insert>
+
+    <update id="update">
+      update qna
+set
+title=#{title},
+body=#{body},
+wtime=now()
+where id=#{id}
+    </update>
+
+    <update id="plusState">
+       update qna
+set answerstate =1
+where id=#{id}
+    </update>
+
+    <update id="plusCallState">
+       update qna
+set answerstate =2
+where id=#{id}
+    </update>
+
+    <update id="countPlus">
+        update qna
+      set count=count+1
+      where id=#{id};
+    </update>
+<!--
+    update qna set
+    title = #{title},
+    body = #{body},
+    wtime = now()
+    where id= #{id}-->
+    <delete id="delete">
+      Delete from qna
+      where id=#{id}
+    </delete>
+
+    <select id="count" resultType="int">
+        select count(*)
+        from qna
+
+    </select>
+
+   <!-- 검색 후 리스트-->
+    <select id="findQnaBySrch" resultMap="resultMapQ">
+        <bind name="start" value="(currentPage-1)*pageSize"/>
+        <bind name="end" value="pageSize"/>
+        select a.id,a.title,a.wtime,s.name studentName,a.count
+        from qna a
+        LEFT JOIN student s
+        on a.student_id = s.id
+        <where>
+            <if test="choice == 0">
+                title LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice == 1">
+                s.name LIKE concat(#{srch},'%')
+            </if>
+        </where>
+        order by a.id desc
+        limit ${start} , ${end}
+    </select>
+
+    <!--전체년도
+   검색후 과목리스트 카운트-->
+    <select id="srchCount" resultType="int">
+        select count(*)
+        from qna a
+        LEFT JOIN student s
+        on a.student_id = s.id
+        <where>
+            <if test="choice == 0">
+                title LIKE concat(#{srch},'%')
+            </if>
+            <if test="choice == 1">
+                s.name LIKE concat(#{srch},'%')
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

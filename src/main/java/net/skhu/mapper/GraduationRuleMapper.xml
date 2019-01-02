@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.skhu.mapper.GraduationRuleMapper">
+
+    <select id="findAll" resultType="Student">
+     select * from GraduationRule
+   </select>
+
+    <select id="findBy18" resultType="Student">
+        SELECT * FROM graduationrule
+        where split = if(left(#{id},4)!=2018, '18학번이전','18학번이후')
+    </select>
+
+</mapper>

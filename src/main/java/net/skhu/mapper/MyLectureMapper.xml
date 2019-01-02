@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.skhu.mapper.MyLectureMapper">
+
+    <!--대체과목 신청목록 조회-->
+    <select id="findReplaceLecByStu" resultType="MyLecture">
+         SELECT  m.*,mr.*,
+        CASE WHEN grade = 'A+' THEN '4.5'
+        WHEN grade = 'A0' THEN '4.0'
+        WHEN grade = 'B+' THEN '3.5'
+        WHEN grade = 'B0' THEN '3.0'
+        WHEN grade = 'C+' THEN '2.5'
+        WHEN grade = 'C0' THEN '2.0'
+        WHEN grade = 'D+' THEN '1.5'
+        WHEN grade = 'D0' THEN '1.0'
+        WHEN grade = 'F'  THEN '0.0'
+        WHEN grade = 'P'  THEN 'P'
+        else 'NP'
+        END AS gradeA
+        from mylecture m inner join
+        myreplace mr on
+        m.lecture_id = mr.replaceLecId
+        where m.student_id = #{id} And (m.remove=3 or m.remove=4);
+
+    </select>
+
+    <select id="findOne" resultType="MyLecture">
+        SELECT *,
+        CASE WHEN grade = 'A+' THEN '4.5'
+        WHEN grade = 'A0' THEN '4.0'
+        WHEN grade = 'B+' THEN '3.5'
+        WHEN grade = 'B0' THEN '3.0'
+        WHEN grade = 'C+' THEN '2.5'
+        WHEN grade = 'C0' THEN '2.0'
+        WHEN grade = 'D+' THEN '1.5'
+        WHEN grade = 'D0' THEN '1.0'
+        WHEN grade = 'F'  THEN '0.0'
+        WHEN grade = 'P'  THEN 'P'
+        else 'NP'
+        END AS gradeA
+        from mylecture
+        where student_id=#{student_id} And lecture_year=#{lecture_year} and lecture_semester like #{lecture_semester}  AND lecture_id like #{lecture_id} ;
+
+    </select>
+
+    <update id="updateByReplaceGrade">
+
+        update mylecture
+        SET
+        grade = #{grade}
+        where lecture_year=#{lecture_year} and lecture_semester like #{lecture_semester} and lecture_id LIKE #{lecture_id} and student_id =#{student_id};
+
+    </update>
+
+
+    <select id="courseCount" resultType="int">
+            SELECT count(*)
+            FROM student s
+            left join department d on s.department_id = d.id
+            left join graduationRule r on s.graduationRule_id=r.id
+            left join mylecture m on s.id = m.student_id
+            where s.id = #{id}
+            <if test="choice == 1">
+               and m.title like concat(#{search},'%')
+             </if>
+             <if test="choice == 2">
+               and m.lecture_year like concat(#{search},'%')
+             </if>
+        </select>
+
+            <select id="findByIdPage" resultType="MyLecture">
+              <bind name="start" value="(currentPage-1)*pageSize"/>
+              <bind name="end" value="pageSize"/>
+                SELECT s.*, d.departmentName,r.detailType , m.*, m.detailType as detailType2,
+                CASE WHEN grade = 'A+' THEN '4.5'
+                WHEN grade = 'A0' THEN '4.0'
+                WHEN grade = 'B+' THEN '3.5'
+                WHEN grade = 'B0' THEN '3.0'
+                WHEN grade = 'C+' THEN '2.5'
+                WHEN grade = 'C0' THEN '2.0'
+                WHEN grade = 'D+' THEN '1.5'
+                WHEN grade = 'D0' THEN '1.0'
+                WHEN grade = 'F'  THEN '0.0'
+                WHEN grade = 'P'  THEN 'P'
+                else 'NP'
+                END AS gradeA
+                FROM student s
+                left join department d on s.department_id = d.id
+                left join graduationRule r on s.graduationRule_id=r.id
+                left join mylecture m on s.id = m.student_id
+                where s.id = #{id}
+                            <if test="choice == 1">
+                               and m.title like concat(#{search},'%')
+                             </if>
+                             <if test="choice == 2">
+                               and m.lecture_year like concat(#{search},'%')
+                             </if>
+                limit ${start} , ${end}
+            </select>
+
+            <delete id="delete">
+                delete from mylecture where remove = #{remove} AND student_id= #{id}
+            </delete>
+
+            <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+                    insert mylecture(lecture_year,lecture_semester,lecture_id,lecture_split,title,detailType,credit,grade,student_id,remove)
+                    values(#{lecture_year}, #{lecture_semester}, #{lecture_id}, #{lecture_split}, #{title}, #{detailType}, #{credit}, #{grade}, #{student_id}, #{remove});
+             </insert>
+
+            <select id="count" resultType="int">
+                   select count(*)
+                   from myLecture where remove = 1
+            </select>
+
+           <select id="replaceLecCount" resultType="int">
+                   select count(*)
+                   from myLecture where remove = 3 or remove=4
+            </select>
+
+
+        <update id="updateMajor">
+        update mylecture set
+          changeMajor = 1 ,
+          detailType = "전선"
+        where lecture_year = #{lecture_year} and lecture_semester = #{lecture_semester} and lecture_id = #{lecture_id} and student_id = #{student_id}
+        </update>
+
+    <update id="initializeMajor">
+        update mylecture set
+          changeMajor = 0 ,
+          detailType = "교선"
+        where changeMajor = 1 and detailType = "전선" and student_id = #{id};
+    </update>
+</mapper>
